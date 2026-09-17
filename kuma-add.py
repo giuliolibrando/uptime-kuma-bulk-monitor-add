@@ -3,6 +3,7 @@ import urllib.parse
 from itertools import groupby
 import tldextract
 import os
+import json
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -29,11 +30,15 @@ api.login(os.getenv('UPTIME_KUMA_USER'), os.getenv('UPTIME_KUMA_PASSWORD'))
 
 with open('urls.txt', 'r') as f:
     for line in f:
+        line = line.strip()
+        if not line:
+            continue
+
         parsedUrl = urllib.parse.urlparse(line)
         if nsfw_check:
             checkName = urlclean(parsedUrl.netloc)
         else:
-            checkName = parsedUrl.netloc
+            checkName = parsedUrl.netloc if parsedUrl.netloc else line
 
         urlCheck = line
 
@@ -44,9 +49,8 @@ with open('urls.txt', 'r') as f:
             description=parsedUrl.netloc,
             url=urlCheck,
             expiryNotification=True,
-            headers={"cache-control": "no-cache"},
+            headers=json.dumps({"cache-control": "no-cache"}),  # Convert in valid JSON string
             interval=120,
-
         )
         print('-----------------------------------')
 
